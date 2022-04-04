@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   
   
-  <title>卷积神经网络(1) | Spike Sun&#39;s Blog</title>
+  <title>卷积层与池化层 | Spike Sun&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="卷积层输入维度：nH × nW × nC （Height、Width、Channel） 卷积层超参数：过滤器个数c、过滤器维度f×f×nC（注意过滤器的通道数应和输入通道数相等）、卷积步长s、padding扩充p个像素 输出维度：[(nH+2p-f)&#x2F;s + 1] × [(nW+2p-f)&#x2F;s + 1] × c （中括号表示向下取整） 经常取s&#x3D;1、p&#x3D;(f">
 <meta property="og:type" content="article">
-<meta property="og:title" content="卷积神经网络(1)">
-<meta property="og:url" content="https://spike-sun.github.io/2022/02/06/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(1)/index.html">
+<meta property="og:title" content="卷积层与池化层">
+<meta property="og:url" content="https://spike-sun.github.io/2022/02/06/%E5%8D%B7%E7%A7%AF%E5%B1%82%E4%B8%8E%E6%B1%A0%E5%8C%96%E5%B1%82/index.html">
 <meta property="og:site_name" content="Spike Sun&#39;s Blog">
 <meta property="og:description" content="卷积层输入维度：nH × nW × nC （Height、Width、Channel） 卷积层超参数：过滤器个数c、过滤器维度f×f×nC（注意过滤器的通道数应和输入通道数相等）、卷积步长s、padding扩充p个像素 输出维度：[(nH+2p-f)&#x2F;s + 1] × [(nW+2p-f)&#x2F;s + 1] × c （中括号表示向下取整） 经常取s&#x3D;1、p&#x3D;(f">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-02-05T17:51:19.000Z">
-<meta property="article:modified_time" content="2022-03-31T09:32:39.106Z">
+<meta property="article:modified_time" content="2022-04-04T14:07:04.073Z">
 <meta property="article:author" content="Spike Sun">
 <meta property="article:tag" content="卷积神经网络">
 <meta name="twitter:card" content="summary">
@@ -74,9 +74,9 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-卷积神经网络(1)" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+        <section id="main"><article id="post-卷积层与池化层" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2022/02/06/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(1)/" class="article-date">
+    <a href="/2022/02/06/%E5%8D%B7%E7%A7%AF%E5%B1%82%E4%B8%8E%E6%B1%A0%E5%8C%96%E5%B1%82/" class="article-date">
   <time class="dt-published" datetime="2022-02-05T17:51:19.000Z" itemprop="datePublished">2022-02-06</time>
 </a>
     
@@ -88,7 +88,7 @@
         
   
     <h1 class="p-name article-title" itemprop="headline name">
-      卷积神经网络(1)
+      卷积层与池化层
     </h1>
   
 
@@ -100,18 +100,18 @@
 <p>卷积层超参数：过滤器个数c、过滤器维度f×f×nC（注意过滤器的通道数应和输入通道数相等）、卷积步长s、padding扩充p个像素</p>
 <p>输出维度：[(nH+2p-f)&#x2F;s + 1] × [(nW+2p-f)&#x2F;s + 1] × c （中括号表示向下取整）</p>
 <p>经常取s&#x3D;1、p&#x3D;(f-1)&#x2F;2，这样卷积之后图像尺寸不变，称为Same Convolution，不扩充（p&#x3D;0）也称为Valid Convolution</p>
-<p>卷积之后，再对每个像素进行非线性函数操作f(kx+b)，输出维度不变，卷积+非线性函数构成一个卷积层，要学习的参数数量为f×f×nC+c，即过滤器中的权重加上每个过滤器有一个偏置量</p>
-<p>1×1卷积相当于对输入中不同信道的同一个像素加全连接层，可以在不改变尺寸的条件下增加或减少信道数量</p>
+<p>卷积之后，再进行非线性函数操作，输出维度不变，卷积层一般指卷积后接非线性函数，一个卷积层进行的变换可表示为f(kX+b)，其中k为卷积核矩阵，X为输入的像素，b为每个卷积核的偏置量，一个卷积层要学习的参数数量为c×(f×f×nC+1)</p>
+<p>1×1卷积相当于对输入中不同信道但在同一个位置上的nC个像素加全连接层，可以在不改变尺寸的条件下增加或减少信道数量，起到了特征融合的作用</p>
 <p>一般来说，越到后面的层，尺寸越小、信道越多，表示提取了高维特征</p>
 <h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>输入维度：nH × nW × nC</p>
-<p>池化层超参数：过滤器维度f×f（对每一个通道分别池化，因此过滤器只有2维，输出与输入通道数相等）、步长s、池化类型max pooling&#x2F;average pooling，注意池化层没有需要学习的参数</p>
+<p>池化层超参数：过滤器维度f×f（对每一个通道分别池化，因此过滤器只有2维，输出与输入通道数相等）、步长s、池化类型（最大池化或平均池化），注意池化层没有需要学习的参数</p>
 <p>输出维度：[(nH-f)&#x2F;s + 1] × [(nW-f)&#x2F;s + 1] × nC （中括号表示向下取整）</p>
-<p>最大池化层可以带来对小偏移的不变性，在CNN中每隔几层就插入一个最大池化层，可以带来更大程度的平移不变性。另外，最大池化层还能带来一定程度的旋转不变性和缩放不变性。当预测不需要考虑平移、旋转和缩放时，比如分类任务，不变性可以有一定益处。</p>
+<p>最大池化层可以带来对小偏移的不变性，在CNN中每隔几层就插入一个最大池化层，可以带来更大程度的平移不变性。另外，最大池化层还能带来一定程度的旋转不变性和缩放不变性。当预测不需要考虑平移、旋转和缩放时，比如分类任务，不变性可以带来一些好处。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://spike-sun.github.io/2022/02/06/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(1)/" data-id="cl1etroxp0000xsv1go0vb4kw" data-title="卷积神经网络(1)" class="article-share-link">分享</a>
+      <a data-url="https://spike-sun.github.io/2022/02/06/%E5%8D%B7%E7%A7%AF%E5%B1%82%E4%B8%8E%E6%B1%A0%E5%8C%96%E5%B1%82/" data-id="cl1ksfior00006ov16dnh5g7y" data-title="卷积层与池化层" class="article-share-link">分享</a>
       
       
       
@@ -168,7 +168,7 @@
       <ul>
         
           <li>
-            <a href="/2022/02/06/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C(1)/">卷积神经网络(1)</a>
+            <a href="/2022/02/06/%E5%8D%B7%E7%A7%AF%E5%B1%82%E4%B8%8E%E6%B1%A0%E5%8C%96%E5%B1%82/">卷积层与池化层</a>
           </li>
         
       </ul>
